@@ -13,14 +13,16 @@ class CreateComponentDefinition extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        $code = $data['code'] ?? [];
+
         $this->pendingVersionData = [
-            'code_html' => $data['code_html'] ?? null,
-            'code_css' => $data['code_css'] ?? null,
-            'code_js' => $data['code_js'] ?? null,
+            'code_html' => $code['html'] ?? null,
+            'code_css' => $code['css'] ?? null,
+            'code_js' => $code['js'] ?? null,
             'message' => $data['message'] ?? 'Version initiale',
         ];
 
-        unset($data['code_html'], $data['code_css'], $data['code_js'], $data['message']);
+        unset($data['code'], $data['message']);
 
         return $data;
     }

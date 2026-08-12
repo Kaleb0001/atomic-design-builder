@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Forms\Components\CodeEditorField;
 use App\Filament\Resources\ComponentDefinitionResource\Pages;
 use App\Filament\Resources\ComponentDefinitionResource\RelationManagers;
 use App\Models\ComponentDefinition;
@@ -73,22 +74,11 @@ class ComponentDefinitionResource extends Resource
                 ]),
 
             Forms\Components\Section::make('Code')
-                ->description('Chaque sauvegarde crée une nouvelle version dans l\'historique (onglet visible après création).')
+                ->description("Éditeur Monaco avec aperçu live sandboxé. Chaque sauvegarde crée une nouvelle version dans l'historique (onglet visible après création).")
                 ->schema([
-                    Forms\Components\Textarea::make('code_html')
-                        ->label('HTML')
-                        ->rows(8)
-                        ->extraInputAttributes(['style' => 'font-family: monospace; font-size: 13px;']),
-
-                    Forms\Components\Textarea::make('code_css')
-                        ->label('CSS')
-                        ->rows(6)
-                        ->extraInputAttributes(['style' => 'font-family: monospace; font-size: 13px;']),
-
-                    Forms\Components\Textarea::make('code_js')
-                        ->label('JS')
-                        ->rows(6)
-                        ->extraInputAttributes(['style' => 'font-family: monospace; font-size: 13px;']),
+                    CodeEditorField::make('code')
+                        ->label('')
+                        ->columnSpanFull(),
 
                     Forms\Components\TextInput::make('message')
                         ->label('Message de version (optionnel)')
