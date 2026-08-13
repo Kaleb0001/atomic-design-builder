@@ -3,10 +3,13 @@
 namespace App\Filament\Resources\ComponentDefinitionResource\Pages;
 
 use App\Filament\Resources\ComponentDefinitionResource;
+use App\Filament\Resources\ComponentDefinitionResource\Concerns\ResolvesPreview;
 use Filament\Resources\Pages\EditRecord;
 
 class EditComponentDefinition extends EditRecord
 {
+    use ResolvesPreview;
+
     protected static string $resource = ComponentDefinitionResource::class;
 
     protected array $pendingVersionData = [];
@@ -15,9 +18,11 @@ class EditComponentDefinition extends EditRecord
     {
         $currentVersion = $this->record->currentVersion;
 
-        $data['code_html'] = $currentVersion?->code_html;
-        $data['code_css'] = $currentVersion?->code_css;
-        $data['code_js'] = $currentVersion?->code_js;
+        $data['code'] = [
+            'html' => $currentVersion?->code_html,
+            'css' => $currentVersion?->code_css,
+            'js' => $currentVersion?->code_js,
+        ];
         $data['message'] = null;
 
         return $data;
@@ -25,14 +30,16 @@ class EditComponentDefinition extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        $code = $data['code'] ?? [];
+
         $this->pendingVersionData = [
-            'code_html' => $data['code_html'] ?? null,
-            'code_css' => $data['code_css'] ?? null,
-            'code_js' => $data['code_js'] ?? null,
+            'code_html' => $code['html'] ?? null,
+            'code_css' => $code['css'] ?? null,
+            'code_js' => $code['js'] ?? null,
             'message' => $data['message'] ?? null,
         ];
 
-        unset($data['code_html'], $data['code_css'], $data['code_js'], $data['message']);
+        unset($data['code'], $data['message']);
 
         return $data;
     }
