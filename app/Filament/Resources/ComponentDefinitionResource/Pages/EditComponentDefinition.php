@@ -3,10 +3,13 @@
 namespace App\Filament\Resources\ComponentDefinitionResource\Pages;
 
 use App\Filament\Resources\ComponentDefinitionResource;
+use App\Filament\Resources\ComponentDefinitionResource\Concerns\ResolvesPreview;
 use Filament\Resources\Pages\EditRecord;
 
 class EditComponentDefinition extends EditRecord
 {
+    use ResolvesPreview;
+
     protected static string $resource = ComponentDefinitionResource::class;
 
     protected array $pendingVersionData = [];

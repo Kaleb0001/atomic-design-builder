@@ -28,7 +28,7 @@
 
             <div>
                 <p style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.5rem;">
-                    Aperçu (sandbox, exécution isolée — mis à jour ~400ms après la dernière frappe)
+                    Aperçu résolu (sandbox — les références vivantes vers d'autres composants sont remplacées par leur contenu publié actuel, actualisé ~600ms après la dernière frappe)
                 </p>
                 <iframe
                     x-ref="preview"
@@ -43,11 +43,6 @@
         <script>
             document.addEventListener('alpine:init', () => {
                 Alpine.data('codeEditor', ({ state }) => {
-                    // Volontairement EN DEHORS de l'objet retourné ci-dessous : les instances
-                    // Monaco et les nœuds DOM ne doivent jamais devenir réactifs (Alpine essaie
-                    // de proxifier tout ce que contient l'objet x-data). Proxifier un éditeur
-                    // Monaco casse son fonctionnement interne et peut figer l'interface sans
-                    // erreur visible — c'était la cause du plantage au changement d'onglet.
                     const editors = {};
                     const editorEls = {};
                     let previewTimeout = null;
@@ -149,10 +144,21 @@
 
                         debouncedPreview() {
                             clearTimeout(previewTimeout);
-                            previewTimeout = setTimeout(() => this.updatePreview(), 400);
+                            previewTimeout = setTimeout(() => this.updatePreview(), 600);
                         },
 
-                        buildPreviewHtml() {
+                        // Passe désormais par la résolution serveur (Module 4) pour rester
+                        // cohérent avec le WYSIWYG : un data-atomic-ref tapé à la main en
+                        // mode code est résolu de la même façon.
+                        updatePreview() {
+                            this.$wire.call('resolvePreviewHtml', this.state).then((resolved) => {
+                                this.$refs.preview.srcdoc = this.buildPreviewHtml(resolved);
+                            }).catch(() => {
+                                this.$refs.preview.srcdoc = this.buildPreviewHtml(this.state);
+                            });
+                        },
+
+                        buildPreviewHtml(source) {
                             const doc = document.implementation.createHTMLDocument('');
 
                             const meta = doc.createElement('meta');
@@ -161,20 +167,16 @@
                             doc.head.appendChild(meta);
 
                             const style = doc.createElement('style');
-                            style.textContent = (this.state && this.state.css) || '';
+                            style.textContent = (source && source.css) || '';
                             doc.head.appendChild(style);
 
-                            doc.body.innerHTML = (this.state && this.state.html) || '';
+                            doc.body.innerHTML = (source && source.html) || '';
 
                             const scriptEl = doc.createElement('script');
-                            scriptEl.textContent = (this.state && this.state.js) || '';
+                            scriptEl.textContent = (source && source.js) || '';
                             doc.body.appendChild(scriptEl);
 
                             return '\x3C!DOCTYPE html>' + doc.documentElement.outerHTML;
-                        },
-
-                        updatePreview() {
-                            this.$refs.preview.srcdoc = this.buildPreviewHtml();
                         },
                     };
                 });

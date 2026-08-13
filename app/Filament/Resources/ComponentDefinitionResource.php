@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Forms\Components\CodeEditorField;
+use App\Filament\Forms\Components\HybridEditorField;
 use App\Filament\Resources\ComponentDefinitionResource\Pages;
 use App\Filament\Resources\ComponentDefinitionResource\RelationManagers;
 use App\Models\ComponentDefinition;
@@ -74,9 +74,9 @@ class ComponentDefinitionResource extends Resource
                 ]),
 
             Forms\Components\Section::make('Code')
-                ->description("Éditeur Monaco avec aperçu live sandboxé. Chaque sauvegarde crée une nouvelle version dans l'historique (onglet visible après création).")
+                ->description("Mode Visuel par défaut ; le mode Code (si vous en avez le droit) est accessible via le bouton en haut. Chaque sauvegarde crée une nouvelle version dans l'historique (onglet visible après création).")
                 ->schema([
-                    CodeEditorField::make('code')
+                    HybridEditorField::make('code')
                         ->label('')
                         ->columnSpanFull(),
 
