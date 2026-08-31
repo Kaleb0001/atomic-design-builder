@@ -10,6 +10,15 @@ class EditPage extends EditRecord
 {
     protected static string $resource = PageResource::class;
 
+    public ?array $previewResult = null;
+
+    public function mount(int|string $record): void
+    {
+        parent::mount($record);
+
+        $this->refreshPreview();
+    }
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
         if (($data['statut'] ?? null) === 'publie' && empty($data['publie_le'])) {
@@ -19,7 +28,7 @@ class EditPage extends EditRecord
         return $data;
     }
 
-    public function renderPagePreview(): array
+    public function refreshPreview(): void
     {
         $blocks = $this->form->getRawState()['pageBlocks'] ?? [];
 
@@ -30,6 +39,6 @@ class EditPage extends EditRecord
 
         [$html, $css] = app(PageRenderer::class)->renderBlocks($activeBlocks);
 
-        return ['html' => $html, 'css' => $css];
+        $this->previewResult = ['html' => $html, 'css' => $css];
     }
 }

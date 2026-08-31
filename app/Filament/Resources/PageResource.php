@@ -59,13 +59,15 @@ class PageResource extends Resource
                 ]),
 
             Forms\Components\Section::make('Sections de la page')
-                ->description('Glissez pour réordonner. Seules les Sections et Templates publiés sont proposés.')
+                ->description('Glissez pour réordonner. Seules les Sections et Templates publiés sont proposés. L\'aperçu en bas se met à jour automatiquement.')
                 ->schema([
                     Forms\Components\Repeater::make('pageBlocks')
                         ->relationship()
                         ->reorderable()
                         ->orderColumn('ordre')
                         ->collapsible()
+                        ->live()
+                        ->afterStateUpdated(fn ($livewire) => $livewire->refreshPreview())
                         ->itemLabel(fn (array $state) => ComponentDefinition::find($state['component_definition_id'] ?? null)?->nom ?? 'Nouveau bloc')
                         ->schema([
                             Forms\Components\Select::make('component_definition_id')
@@ -83,6 +85,7 @@ class PageResource extends Resource
 
                             Forms\Components\Toggle::make('actif')
                                 ->label('Actif')
+                                ->live()
                                 ->default(true),
 
                             Forms\Components\Fieldset::make('Contenu de ce bloc')
@@ -104,6 +107,7 @@ class PageResource extends Resource
                                     return collect($fields)->map(
                                         fn (string $field) => Forms\Components\TextInput::make("contenu_json.{$field}")
                                             ->label(Str::headline($field))
+                                            ->live(onBlur: true)
                                     )->all();
                                 }),
                         ])

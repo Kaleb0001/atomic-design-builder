@@ -10,6 +10,15 @@ class CreatePage extends CreateRecord
 {
     protected static string $resource = PageResource::class;
 
+    public ?array $previewResult = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        $this->refreshPreview();
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         if (($data['statut'] ?? null) === 'publie' && empty($data['publie_le'])) {
@@ -20,10 +29,11 @@ class CreatePage extends CreateRecord
     }
 
     /**
-     * Appelée depuis le JS (aperçu) via $wire.call. getRawState() est utilisé plutôt
-     * que getState() pour ne pas déclencher la validation pendant qu'on tape.
+     * Appelée automatiquement (afterStateUpdated sur le Repeater et ses champs live)
+     * et depuis le bouton "Actualiser". getRawState() plutôt que getState() pour ne
+     * pas déclencher la validation pendant la saisie.
      */
-    public function renderPagePreview(): array
+    public function refreshPreview(): void
     {
         $blocks = $this->form->getRawState()['pageBlocks'] ?? [];
 
@@ -34,6 +44,6 @@ class CreatePage extends CreateRecord
 
         [$html, $css] = app(PageRenderer::class)->renderBlocks($activeBlocks);
 
-        return ['html' => $html, 'css' => $css];
+        $this->previewResult = ['html' => $html, 'css' => $css];
     }
 }
